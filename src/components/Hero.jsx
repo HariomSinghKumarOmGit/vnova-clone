@@ -3,7 +3,7 @@ import { ShieldCheck, Zap, Cog, ArrowRight } from 'lucide-react';
 
 export default function Hero() {
   return (
-    <div className="relative overflow-hidden py-24 sm:py-32">
+    <div id="hero" className="relative overflow-hidden py-24 sm:py-32">
       {/* Decorative Neon Glow Blobs */}
       <div className="absolute top-1/4 left-1/4 -z-10 h-96 w-96 -translate-x-1/2 rounded-full bg-brand-cyan/10 blur-[120px] pointer-events-none"></div>
       <div className="absolute bottom-1/4 right-1/4 -z-10 h-96 w-96 translate-x-1/2 rounded-full bg-brand-emerald/10 blur-[120px] pointer-events-none"></div>

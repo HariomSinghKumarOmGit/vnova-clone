@@ -113,7 +113,7 @@ export default function AdminDashboard({ setActiveTab }) {
 
         <div className="overflow-x-auto">
           <table className="w-full text-left text-sm text-slate-300">
-            <thead className="bg-[#050811] text-xs font-mono uppercase tracking-wider text-slate-400 border-b border-dark-border">
+            <thead className="bg-dark-highlight text-xs font-mono uppercase tracking-wider text-slate-400 border-b border-dark-border">
               <tr>
                 <th className="px-6 py-3.5">Company</th>
                 <th className="px-6 py-3.5">Subject</th>
@@ -131,7 +131,7 @@ export default function AdminDashboard({ setActiveTab }) {
                 </tr>
               ) : (
                 recentQueries.map((query) => (
-                  <tr key={query.id} className="hover:bg-slate-900/40 transition-colors">
+                  <tr key={query.id} className="hover:bg-dark-highlight/40 transition-colors">
                     <td className="px-6 py-4 font-bold text-white">
                       {query.company_name || 'Individual'}
                     </td>

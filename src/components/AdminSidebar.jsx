@@ -1,7 +1,24 @@
 import React from 'react';
-import { LayoutDashboard, Package, Mail, CalendarDays, LogOut, Terminal, Cpu } from 'lucide-react';
+import { LayoutDashboard, Package, Mail, CalendarDays, LogOut, Terminal, Cpu, Sun, Moon } from 'lucide-react';
 
 export default function AdminSidebar({ activeTab, setActiveTab, onExit }) {
+  const [isDark, setIsDark] = React.useState(false);
+
+  React.useEffect(() => {
+    const isDarkMode = document.documentElement.classList.contains('dark');
+    setIsDark(isDarkMode);
+  }, []);
+
+  const toggleTheme = () => {
+    const nextDark = !isDark;
+    setIsDark(nextDark);
+    if (nextDark) {
+      document.documentElement.classList.add('dark');
+    } else {
+      document.documentElement.classList.remove('dark');
+    }
+  };
+
   const MENU_ITEMS = [
     { id: 'dashboard', name: 'Performance Matrix', icon: LayoutDashboard },
     { id: 'inventory', name: 'Inventory Manager', icon: Package },
@@ -10,7 +27,7 @@ export default function AdminSidebar({ activeTab, setActiveTab, onExit }) {
   ];
 
   return (
-    <aside className="w-64 border-r border-dark-border bg-[#050811] flex flex-col shrink-0 h-screen sticky top-0">
+    <aside className="w-64 border-r border-dark-border bg-dark-card flex flex-col shrink-0 h-screen sticky top-0">
       {/* Top Brand Area */}
       <div className="p-6 border-b border-dark-border flex items-center space-x-3">
         <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-gradient-to-br from-brand-cyan to-brand-emerald text-dark-bg">
@@ -34,7 +51,7 @@ export default function AdminSidebar({ activeTab, setActiveTab, onExit }) {
               className={`w-full flex items-center space-x-3 px-4 py-3 rounded-lg text-sm font-medium transition-all duration-200 ${
                 isActive
                   ? 'bg-brand-cyan/15 text-brand-cyan border border-brand-cyan/30'
-                  : 'text-slate-400 hover:bg-slate-900 hover:text-white border border-transparent'
+                  : 'text-slate-400 hover:bg-dark-highlight hover:text-white border border-transparent'
               }`}
             >
               <Icon className="h-5 w-5" />
@@ -45,7 +62,14 @@ export default function AdminSidebar({ activeTab, setActiveTab, onExit }) {
       </nav>
 
       {/* Bottom Profile / Exit Area */}
-      <div className="p-4 border-t border-dark-border">
+      <div className="p-4 border-t border-dark-border space-y-3">
+        <button
+          onClick={toggleTheme}
+          className="w-full flex items-center justify-center space-x-2 px-4 py-2.5 rounded-lg border border-dark-border text-slate-400 hover:text-white hover:bg-dark-highlight/40 text-xs font-mono tracking-wide uppercase transition-all duration-300"
+        >
+          {isDark ? <Sun className="h-4 w-4 text-brand-cyan" /> : <Moon className="h-4 w-4 text-brand-emerald" />}
+          <span>{isDark ? 'Light Mode' : 'Dark Mode'}</span>
+        </button>
         <button
           onClick={onExit}
           className="w-full flex items-center justify-center space-x-2 px-4 py-2.5 rounded-lg border border-red-500/30 bg-red-500/10 text-red-400 hover:bg-red-500/20 text-xs font-mono tracking-wide uppercase transition-all duration-300"

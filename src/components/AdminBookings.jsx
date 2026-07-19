@@ -42,7 +42,7 @@ export default function AdminBookings() {
             {bookings.map((b) => (
               <div 
                 key={b.id}
-                className="rounded-xl border border-dark-border bg-dark-card/30 p-6 glass flex flex-col justify-between hover:border-slate-800 transition-colors"
+                className="rounded-xl border border-dark-border bg-dark-card/30 p-6 glass flex flex-col justify-between hover:border-brand-cyan/30 transition-colors"
               >
                 <div>
                   <div className="flex justify-between items-start gap-2 mb-4">

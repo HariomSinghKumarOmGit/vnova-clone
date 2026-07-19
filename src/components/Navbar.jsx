@@ -20,7 +20,23 @@ export default function Navbar({ onNavigate, currentView }) {
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <div className="flex h-20 items-center justify-between">
           {/* Logo Section */}
-          <a href="/" onClick={(e) => { e.preventDefault(); onNavigate('home'); }} className="flex items-center space-x-3 cursor-pointer">
+          <a 
+            href="#hero" 
+            onClick={(e) => { 
+              e.preventDefault(); 
+              onNavigate('home'); 
+              // Wait slightly for layout/view state transitions if switching layout, then scroll
+              setTimeout(() => {
+                const el = document.getElementById('hero');
+                if (el) {
+                  el.scrollIntoView({ behavior: 'smooth' });
+                } else {
+                  window.scrollTo({ top: 0, behavior: 'smooth' });
+                }
+              }, 50);
+            }} 
+            className="flex items-center space-x-3 cursor-pointer"
+          >
             <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-gradient-to-br from-brand-cyan to-brand-emerald text-dark-bg">
               <Cpu className="h-6 w-6 stroke-[2]" />
             </div>

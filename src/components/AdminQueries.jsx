@@ -35,7 +35,7 @@ export default function AdminQueries() {
           queries.map((q) => (
             <div 
               key={q.id}
-              className="rounded-xl border border-dark-border bg-dark-card/30 p-6 glass hover:border-slate-800 transition-colors"
+              className="rounded-xl border border-dark-border bg-dark-card/30 p-6 glass hover:border-brand-cyan/30 transition-colors"
             >
               <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2 border-b border-dark-border pb-4 mb-4">
                 <div>
@@ -58,7 +58,7 @@ export default function AdminQueries() {
                   <FileText className="h-3.5 w-3.5" />
                   <span>Subject: {q.subject || 'N/A'}</span>
                 </h4>
-                <p className="text-sm text-slate-300 leading-relaxed bg-[#050811] p-4 rounded-lg border border-slate-900 whitespace-pre-line font-sans">
+                <p className="text-sm text-slate-300 leading-relaxed bg-dark-bg/50 p-4 rounded-lg border border-dark-border whitespace-pre-line font-sans">
                   {q.technical_message}
                 </p>
               </div>

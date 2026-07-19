@@ -140,7 +140,7 @@ export default function AdminInventory() {
             <div>
               {/* Product Header (Image & Identity) */}
               <div className="flex space-x-4 mb-4">
-                <div className="h-20 w-20 shrink-0 bg-slate-900 border border-slate-800 rounded-lg p-2 flex items-center justify-center">
+                <div className="h-20 w-20 shrink-0 bg-dark-bg border border-dark-border rounded-lg p-2 flex items-center justify-center">
                   {prod.image_url && prod.image_url.startsWith('data:') ? (
                     <div className="h-full w-full" dangerouslySetInnerHTML={{ __html: decodeURIComponent(prod.image_url.split(',')[1] || '') }} />
                   ) : (
@@ -164,16 +164,16 @@ export default function AdminInventory() {
               <p className="text-sm text-slate-400 leading-relaxed mb-4">{prod.description}</p>
 
               {/* Specifications Sub-Panel */}
-              <div className="bg-[#050811] rounded-lg p-4 border border-dark-border space-y-2 mb-6 text-xs font-mono">
-                <div className="flex justify-between border-b border-slate-900 pb-1.5">
+              <div className="bg-dark-bg rounded-lg p-4 border border-dark-border space-y-2 mb-6 text-xs font-mono">
+                <div className="flex justify-between border-b border-dark-border pb-1.5">
                   <span className="text-slate-500">Material:</span>
                   <span className="text-slate-300">{prod.material || 'N/A'}</span>
                 </div>
-                <div className="flex justify-between border-b border-slate-900 pb-1.5">
+                <div className="flex justify-between border-b border-dark-border pb-1.5">
                   <span className="text-slate-500">Precision Tolerance:</span>
                   <span className="text-brand-emerald font-semibold">{prod.precision_tolerance || 'N/A'}</span>
                 </div>
-                <div className="flex justify-between border-b border-slate-900 pb-1.5">
+                <div className="flex justify-between border-b border-dark-border pb-1.5">
                   <span className="text-slate-500">Dimensions:</span>
                   <span className="text-slate-300">{prod.dimensions || 'N/A'}</span>
                 </div>
@@ -203,7 +203,7 @@ export default function AdminInventory() {
               <div className="flex space-x-3">
                 <button
                   onClick={() => handleEditClick(prod)}
-                  className="flex items-center space-x-1.5 text-xs text-slate-400 hover:text-white transition-colors bg-slate-900 border border-slate-800 rounded px-2.5 py-1.5 font-mono"
+                  className="flex items-center space-x-1.5 text-xs text-slate-400 hover:text-white transition-colors bg-dark-card hover:bg-dark-highlight border border-dark-border rounded px-2.5 py-1.5 font-mono"
                 >
                   <Edit2 className="h-3.5 w-3.5" />
                   <span>Edit</span>
@@ -358,7 +358,7 @@ export default function AdminInventory() {
                 <button
                   type="button"
                   onClick={() => setModalOpen(false)}
-                  className="rounded-lg border border-slate-700 bg-slate-900/50 px-5 py-2.5 text-xs font-mono uppercase tracking-wide text-white hover:bg-slate-800"
+                  className="rounded-lg border border-dark-border bg-dark-highlight/50 px-5 py-2.5 text-xs font-mono uppercase tracking-wide text-white hover:bg-dark-highlight"
                 >
                   Cancel
                 </button>
