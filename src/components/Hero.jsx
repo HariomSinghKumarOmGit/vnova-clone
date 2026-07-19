@@ -40,7 +40,7 @@ export default function Hero() {
             </a>
             <a
               href="#contact"
-              className="rounded-lg border border-slate-700 bg-slate-900/50 px-5 py-3 text-sm font-semibold text-white hover:bg-slate-800 hover:border-slate-600 transition-all duration-300"
+              className="rounded-lg border border-dark-border bg-dark-card/50 px-5 py-3 text-sm font-semibold text-white hover:bg-dark-highlight transition-all duration-300"
             >
               Book Factory Consult
             </a>

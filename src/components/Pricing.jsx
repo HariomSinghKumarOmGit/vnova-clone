@@ -107,7 +107,7 @@ export default function Pricing() {
                   className={`block w-full rounded-lg py-3 text-center text-xs font-mono font-bold uppercase tracking-wider transition-all duration-300 ${
                     pkg.popular 
                       ? 'bg-brand-cyan text-dark-bg hover:bg-brand-cyan-glow glow-cyan'
-                      : 'border border-slate-700 bg-slate-900/50 text-white hover:bg-slate-800'
+                      : 'border border-dark-border bg-dark-card/50 text-white hover:bg-dark-highlight'
                   }`}
                 >
                   {pkg.cta}
