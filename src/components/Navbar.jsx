@@ -1,13 +1,25 @@
 import React from 'react';
-import { Cpu, Terminal, ExternalLink, Sun, Moon } from 'lucide-react';
+import { Cpu, LogIn, Sun, Moon, UserCircle, LogOut, ChevronDown } from 'lucide-react';
 
-export default function Navbar({ onNavigate, currentView }) {
+export default function Navbar({ onNavigate, currentView, user, onOpenLogin, onLogout }) {
   const [isDark, setIsDark] = React.useState(false);
+  const [profileOpen, setProfileOpen] = React.useState(false);
+  const profileRef = React.useRef(null);
 
   React.useEffect(() => {
-    // Check if user has explicit preference, otherwise default to light
     const isDarkMode = document.documentElement.classList.contains('dark');
     setIsDark(isDarkMode);
+  }, []);
+
+  // Close profile dropdown on outside click
+  React.useEffect(() => {
+    const handleClickOutside = (e) => {
+      if (profileRef.current && !profileRef.current.contains(e.target)) {
+        setProfileOpen(false);
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
   const toggleTheme = () => {
@@ -74,7 +86,7 @@ export default function Navbar({ onNavigate, currentView }) {
             </a>
           </div>
 
-          {/* Action Button - Control Room Login & Theme Toggle */}
+          {/* Action Buttons - Theme Toggle & Login/Profile */}
           <div className="flex items-center space-x-4">
             <button
               onClick={toggleTheme}
@@ -84,18 +96,62 @@ export default function Navbar({ onNavigate, currentView }) {
               {isDark ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
             </button>
 
-            <button
-              onClick={() => onNavigate(currentView === 'admin' ? 'home' : 'admin')}
-              className={`flex items-center space-x-2 rounded-lg px-4 py-2 text-xs font-mono tracking-wide uppercase transition-all duration-300 border ${
-                currentView === 'admin' 
-                  ? 'border-brand-emerald/40 bg-brand-emerald/10 text-brand-emerald hover:bg-brand-emerald/20' 
-                  : 'border-brand-cyan/40 bg-brand-cyan/10 text-brand-cyan hover:bg-brand-cyan/20 glow-cyan'
-              }`}
-            >
-              <Terminal className="h-4 w-4" />
-              <span>{currentView === 'admin' ? 'Public Exit' : 'Control Room'}</span>
-              <ExternalLink className="h-3 w-3 opacity-60" />
-            </button>
+            {/* Login Button OR Profile Icon */}
+            {!user ? (
+              <button
+                onClick={onOpenLogin}
+                className="flex items-center space-x-2 rounded-lg px-4 py-2 text-xs font-mono tracking-wide uppercase transition-all duration-300 border border-brand-cyan/40 bg-brand-cyan/10 text-brand-cyan hover:bg-brand-cyan/20 glow-cyan"
+              >
+                <LogIn className="h-4 w-4" />
+                <span>Login</span>
+              </button>
+            ) : (
+              <div className="relative" ref={profileRef}>
+                <button
+                  onClick={() => setProfileOpen(!profileOpen)}
+                  className="flex items-center space-x-2 rounded-lg px-3 py-2 text-xs font-mono tracking-wide transition-all duration-300 border border-brand-emerald/40 bg-brand-emerald/10 text-brand-emerald hover:bg-brand-emerald/20"
+                >
+                  <div className="h-7 w-7 rounded-full bg-gradient-to-br from-brand-cyan to-brand-emerald flex items-center justify-center text-dark-bg font-bold text-sm uppercase">
+                    {user.userId.charAt(0)}
+                  </div>
+                  <span className="hidden sm:inline">{user.userId}</span>
+                  <ChevronDown className={`h-3 w-3 transition-transform duration-200 ${profileOpen ? 'rotate-180' : ''}`} />
+                </button>
+
+                {/* Profile Dropdown */}
+                {profileOpen && (
+                  <div className="absolute right-0 mt-2 w-48 rounded-xl border border-dark-border bg-dark-card shadow-xl overflow-hidden profile-dropdown-in z-50">
+                    <div className="px-4 py-3 border-b border-dark-border">
+                      <p className="text-xs font-mono text-brand-cyan uppercase tracking-wider">Signed in as</p>
+                      <p className="text-sm text-white font-medium mt-0.5">{user.userId}</p>
+                      {user.isAdmin && (
+                        <span className="inline-block mt-1 px-2 py-0.5 text-[10px] font-mono uppercase tracking-wider rounded-full bg-brand-cyan/10 text-brand-cyan border border-brand-cyan/20">
+                          Admin
+                        </span>
+                      )}
+                    </div>
+
+                    {user.isAdmin && (
+                      <button
+                        onClick={() => { setProfileOpen(false); onNavigate('admin'); }}
+                        className="w-full px-4 py-2.5 text-left text-sm text-slate-300 hover:bg-white/5 hover:text-brand-cyan transition-colors flex items-center space-x-2"
+                      >
+                        <UserCircle className="h-4 w-4" />
+                        <span>Admin Panel</span>
+                      </button>
+                    )}
+
+                    <button
+                      onClick={() => { setProfileOpen(false); onLogout(); }}
+                      className="w-full px-4 py-2.5 text-left text-sm text-red-400 hover:bg-red-500/5 hover:text-red-300 transition-colors flex items-center space-x-2 border-t border-dark-border"
+                    >
+                      <LogOut className="h-4 w-4" />
+                      <span>Sign Out</span>
+                    </button>
+                  </div>
+                )}
+              </div>
+            )}
           </div>
         </div>
       </div>

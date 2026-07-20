@@ -8,6 +8,7 @@ import Industries from './components/Industries';
 import Pricing from './components/Pricing';
 import ContactForm from './components/ContactForm';
 import Footer from './components/Footer';
+import LoginModal from './components/LoginModal';
 
 // Admin Components
 import AdminSidebar from './components/AdminSidebar';
@@ -18,15 +19,33 @@ import AdminBookings from './components/AdminBookings';
 
 export default function App() {
   const [layout, setLayout] = useState('public'); // 'public' | 'admin'
-  const [adminTab, setAdminTab] = useState('dashboard'); // 'dashboard' | 'inventory' | 'queries' | 'bookings'
+  const [adminTab, setAdminTab] = useState('dashboard');
+  const [user, setUser] = useState(null); // { userId, isAdmin }
+  const [loginOpen, setLoginOpen] = useState(false);
 
   const handleNavigate = (view) => {
     if (view === 'admin') {
-      setLayout('admin');
-      setAdminTab('dashboard');
+      if (user && user.isAdmin) {
+        setLayout('admin');
+        setAdminTab('dashboard');
+      }
     } else {
       setLayout('public');
     }
+  };
+
+  const handleLogin = (userData) => {
+    setUser(userData);
+    // If admin, redirect to admin panel immediately
+    if (userData.isAdmin) {
+      setLayout('admin');
+      setAdminTab('dashboard');
+    }
+  };
+
+  const handleLogout = () => {
+    setUser(null);
+    setLayout('public');
   };
 
   if (layout === 'admin') {
@@ -58,7 +77,13 @@ export default function App() {
   // Public Portal Layout
   return (
     <div className="min-h-screen bg-dark-bg selection:bg-brand-cyan selection:text-dark-bg">
-      <Navbar onNavigate={handleNavigate} currentView="public" />
+      <Navbar 
+        onNavigate={handleNavigate} 
+        currentView="public" 
+        user={user}
+        onOpenLogin={() => setLoginOpen(true)}
+        onLogout={handleLogout}
+      />
       
       <main>
         <Hero />
@@ -69,6 +94,13 @@ export default function App() {
       </main>
 
       <Footer />
+
+      {/* Login Modal */}
+      <LoginModal
+        isOpen={loginOpen}
+        onClose={() => setLoginOpen(false)}
+        onLogin={handleLogin}
+      />
     </div>
   );
 }
