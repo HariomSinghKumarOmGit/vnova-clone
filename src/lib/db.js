@@ -12,12 +12,29 @@ const supabase = isSupabaseConfigured
   ? createClient(supabaseUrl, supabaseAnonKey) 
   : null;
 
+export { supabase };
+
 // High-tech vector SVGs for robotic parts
-const MOCK_PART_IMAGES = {
+export const MOCK_PART_IMAGES = {
   gripper: "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%2306b6d4' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'><path d='M15 3h6v6M9 21H3v-6M21 3l-7 7M3 21l7-7M5 8h14M8 5v14'/></svg>",
   actuator: "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%2310b981' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'><rect x='4' y='4' width='16' height='16' rx='2' ry='2'/><path d='M9 9h6v6H9zM9 1v3M15 1v3M9 20v3M15 20v3M1 9h3M1 15h3M20 9h3M20 15h3'/></svg>",
   sensor: "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23f59e0b' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'><circle cx='12' cy='12' r='10'/><path d='M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83'/></svg>",
   chassis: "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23ec4899' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'><path d='M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z'/><polyline points='3.27 6.96 12 12.01 20.73 6.96'/><line x1='12' y1='22.08' x2='12' y2='12'/></svg>"
+};
+
+export const getCategoryImage = (category) => {
+  switch (category) {
+    case 'End Effectors':
+      return MOCK_PART_IMAGES.gripper;
+    case 'Actuators':
+      return MOCK_PART_IMAGES.actuator;
+    case 'Sensors':
+      return MOCK_PART_IMAGES.sensor;
+    case 'Structural Frame':
+      return MOCK_PART_IMAGES.chassis;
+    default:
+      return MOCK_PART_IMAGES.gripper;
+  }
 };
 
 // Default Mock Data for seeding LocalStorage
@@ -162,11 +179,72 @@ if (typeof window !== 'undefined') {
 
 // Database API implementation
 export const db = {
+  // SEED METHODS FOR SUPABASE
+  async seedProducts() {
+    try {
+      const productsToSeed = DEFAULT_PRODUCTS.map(p => {
+        const { id: _id, ...rest } = p;
+        return rest;
+      });
+      const { error } = await supabase.from('products').insert(productsToSeed);
+      if (error) throw error;
+      console.log("Successfully seeded default products to Supabase");
+    } catch (err) {
+      console.error("Failed to seed products in Supabase:", err);
+    }
+  },
+
+  async seedQueries() {
+    try {
+      const queriesToSeed = DEFAULT_QUERIES.map(q => {
+        const { id: _id, ...rest } = q;
+        return rest;
+      });
+      const { error } = await supabase.from('client_queries').insert(queriesToSeed);
+      if (error) throw error;
+      console.log("Successfully seeded default client queries to Supabase");
+    } catch (err) {
+      console.error("Failed to seed client queries in Supabase:", err);
+    }
+  },
+
+  async seedBookings() {
+    try {
+      const bookingsToSeed = DEFAULT_BOOKINGS.map(b => {
+        const { id: _id, ...rest } = b;
+        return rest;
+      });
+      const { error } = await supabase.from('consultation_bookings').insert(bookingsToSeed);
+      if (error) throw error;
+      console.log("Successfully seeded default consultation bookings to Supabase");
+    } catch (err) {
+      console.error("Failed to seed bookings in Supabase:", err);
+    }
+  },
+
+  async seedProfile() {
+    try {
+      const { id: _id, ...profileToSeed } = DEFAULT_PROFILE;
+      const { error } = await supabase.from('company_profile').insert(profileToSeed);
+      if (error) throw error;
+      console.log("Successfully seeded default company profile to Supabase");
+    } catch (err) {
+      console.error("Failed to seed company profile in Supabase:", err);
+    }
+  },
+
   // PRODUCTS METHODS
   async getProducts() {
     if (isSupabaseConfigured) {
       const { data, error } = await supabase.from('products').select('*').order('created_at', { ascending: false });
-      if (!error) return data;
+      if (!error) {
+        if (data.length === 0) {
+          await this.seedProducts();
+          const { data: refetched, error: refetchErr } = await supabase.from('products').select('*').order('created_at', { ascending: false });
+          if (!refetchErr) return refetched;
+        }
+        return data;
+      }
       console.error("Supabase getProducts error, falling back to LocalStorage:", error);
     }
     initializeLocalStorage();
@@ -174,18 +252,24 @@ export const db = {
   },
 
   async addProduct(product) {
-    const newProduct = {
-      id: "prod-" + Date.now(),
-      ...product,
-      image_url: product.image_url || MOCK_PART_IMAGES.gripper,
-      created_at: new Date().toISOString()
-    };
     if (isSupabaseConfigured) {
+      const { id: _id, ...productData } = product;
+      const newProduct = {
+        ...productData,
+        image_url: product.image_url || getCategoryImage(product.category),
+        created_at: new Date().toISOString()
+      };
       const { data, error } = await supabase.from('products').insert([newProduct]).select();
       if (!error) return data[0];
       console.error("Supabase addProduct error, falling back to LocalStorage:", error);
     }
     initializeLocalStorage();
+    const newProduct = {
+      id: "prod-" + Date.now(),
+      ...product,
+      image_url: product.image_url || getCategoryImage(product.category),
+      created_at: new Date().toISOString()
+    };
     const products = JSON.parse(localStorage.getItem('vnova_products') || '[]');
     products.unshift(newProduct);
     localStorage.setItem('vnova_products', JSON.stringify(products));
@@ -226,7 +310,14 @@ export const db = {
   async getQueries() {
     if (isSupabaseConfigured) {
       const { data, error } = await supabase.from('client_queries').select('*').order('created_at', { ascending: false });
-      if (!error) return data;
+      if (!error) {
+        if (data.length === 0) {
+          await this.seedQueries();
+          const { data: refetched, error: refetchErr } = await supabase.from('client_queries').select('*').order('created_at', { ascending: false });
+          if (!refetchErr) return refetched;
+        }
+        return data;
+      }
       console.error("Supabase getQueries error, falling back to LocalStorage:", error);
     }
     initializeLocalStorage();
@@ -234,17 +325,22 @@ export const db = {
   },
 
   async addQuery(query) {
-    const newQuery = {
-      id: "query-" + Date.now(),
-      ...query,
-      created_at: new Date().toISOString()
-    };
     if (isSupabaseConfigured) {
+      const { id: _id, ...queryData } = query;
+      const newQuery = {
+        ...queryData,
+        created_at: new Date().toISOString()
+      };
       const { data, error } = await supabase.from('client_queries').insert([newQuery]).select();
       if (!error) return data[0];
       console.error("Supabase addQuery error, falling back to LocalStorage:", error);
     }
     initializeLocalStorage();
+    const newQuery = {
+      id: "query-" + Date.now(),
+      ...query,
+      created_at: new Date().toISOString()
+    };
     const queries = JSON.parse(localStorage.getItem('vnova_queries') || '[]');
     queries.unshift(newQuery);
     localStorage.setItem('vnova_queries', JSON.stringify(queries));
@@ -255,7 +351,14 @@ export const db = {
   async getBookings() {
     if (isSupabaseConfigured) {
       const { data, error } = await supabase.from('consultation_bookings').select('*').order('target_date', { ascending: true });
-      if (!error) return data;
+      if (!error) {
+        if (data.length === 0) {
+          await this.seedBookings();
+          const { data: refetched, error: refetchErr } = await supabase.from('consultation_bookings').select('*').order('target_date', { ascending: true });
+          if (!refetchErr) return refetched;
+        }
+        return data;
+      }
       console.error("Supabase getBookings error, falling back to LocalStorage:", error);
     }
     initializeLocalStorage();
@@ -263,18 +366,24 @@ export const db = {
   },
 
   async addBooking(booking) {
+    if (isSupabaseConfigured) {
+      const { id: _id, ...bookingData } = booking;
+      const newBooking = {
+        ...bookingData,
+        status: "Scheduled",
+        created_at: new Date().toISOString()
+      };
+      const { data, error } = await supabase.from('consultation_bookings').insert([newBooking]).select();
+      if (!error) return data[0];
+      console.error("Supabase addBooking error, falling back to LocalStorage:", error);
+    }
+    initializeLocalStorage();
     const newBooking = {
       id: "booking-" + Date.now(),
       ...booking,
       status: "Scheduled",
       created_at: new Date().toISOString()
     };
-    if (isSupabaseConfigured) {
-      const { data, error } = await supabase.from('consultation_bookings').insert([newBooking]).select();
-      if (!error) return data[0];
-      console.error("Supabase addBooking error, falling back to LocalStorage:", error);
-    }
-    initializeLocalStorage();
     const bookings = JSON.parse(localStorage.getItem('vnova_bookings') || '[]');
     bookings.unshift(newBooking);
     localStorage.setItem('vnova_bookings', JSON.stringify(bookings));
@@ -302,10 +411,137 @@ export const db = {
   async getProfile() {
     if (isSupabaseConfigured) {
       const { data, error } = await supabase.from('company_profile').select('*');
-      if (!error && data.length > 0) return data[0];
+      if (!error) {
+        if (data.length === 0) {
+          await this.seedProfile();
+          const { data: refetched, error: refetchErr } = await supabase.from('company_profile').select('*');
+          if (!refetchErr && refetched.length > 0) return refetched[0];
+        } else if (data.length > 0) {
+          return data[0];
+        }
+      }
       console.error("Supabase getProfile error, falling back to LocalStorage:", error);
     }
     initializeLocalStorage();
     return JSON.parse(localStorage.getItem('vnova_profile') || '{}');
+  },
+
+  // PRODUCT IMAGES METHODS
+  async getProductImages(productId) {
+    if (isSupabaseConfigured) {
+      const { data, error } = await supabase
+        .from('product_images')
+        .select('*')
+        .eq('product_id', productId)
+        .order('display_order', { ascending: true });
+      if (!error) return data || [];
+      console.error("Supabase getProductImages error:", error);
+    }
+    return [];
+  },
+
+  async uploadProductImage(productId, file) {
+    if (!isSupabaseConfigured) {
+      console.error("Supabase not configured, cannot upload images");
+      throw new Error("Supabase not configured");
+    }
+    // Generate unique filename
+    const ext = file.name.split('.').pop();
+    const fileName = `${productId}/${Date.now()}_${Math.random().toString(36).slice(2, 8)}.${ext}`;
+
+    // Step 1: Upload to Supabase Storage bucket "image"
+    console.log("Uploading to storage:", fileName);
+    const { data: uploadData, error: uploadError } = await supabase.storage
+      .from('image')
+      .upload(fileName, file, { cacheControl: '3600', upsert: false });
+
+    if (uploadError) {
+      console.error("Storage upload failed:", uploadError);
+      throw new Error(`Storage upload failed: ${uploadError.message}`);
+    }
+    console.log("Storage upload success:", uploadData.path);
+
+    // Step 2: Get public URL
+    const { data: urlData } = supabase.storage
+      .from('image')
+      .getPublicUrl(uploadData.path);
+
+    const publicUrl = urlData.publicUrl;
+    console.log("Public URL:", publicUrl);
+
+    // Step 3: Get current max display_order
+    const { data: existing } = await supabase
+      .from('product_images')
+      .select('display_order')
+      .eq('product_id', productId)
+      .order('display_order', { ascending: false })
+      .limit(1);
+
+    const nextOrder = (existing && existing.length > 0) ? existing[0].display_order + 1 : 0;
+
+    // Step 4: Insert record into product_images table
+    const { data: imgRow, error: insertError } = await supabase
+      .from('product_images')
+      .insert([{
+        product_id: productId,
+        image_url: publicUrl,
+        display_order: nextOrder
+      }])
+      .select();
+
+    if (insertError) {
+      console.error("DB insert failed:", insertError);
+      throw new Error(`DB insert failed: ${insertError.message}`);
+    }
+
+    // If this is the first image, set it as the product's main image_url
+    if (nextOrder === 0) {
+      await supabase.from('products').update({ image_url: publicUrl }).eq('id', productId);
+    }
+
+    console.log("Image uploaded successfully:", imgRow[0]);
+    return imgRow[0];
+  },
+
+  async deleteProductImage(imageId, imageUrl) {
+    if (!isSupabaseConfigured) return false;
+    try {
+      // Extract the storage path from the URL
+      const urlObj = new URL(imageUrl);
+      const pathParts = urlObj.pathname.split('/storage/v1/object/public/image/');
+      const storagePath = pathParts.length > 1 ? decodeURIComponent(pathParts[1]) : null;
+
+      // Delete from storage
+      if (storagePath) {
+        const { error: storageErr } = await supabase.storage.from('image').remove([storagePath]);
+        if (storageErr) console.warn("Storage delete warning:", storageErr);
+      }
+
+      // Delete from database
+      const { error: dbErr } = await supabase
+        .from('product_images')
+        .delete()
+        .eq('id', imageId);
+
+      if (dbErr) throw dbErr;
+      return true;
+    } catch (err) {
+      console.error("Failed to delete product image:", err);
+      return false;
+    }
+  },
+
+  async reorderProductImages(imageId, newOrder) {
+    if (!isSupabaseConfigured) return null;
+    const { data, error } = await supabase
+      .from('product_images')
+      .update({ display_order: newOrder })
+      .eq('id', imageId)
+      .select();
+    if (error) {
+      console.error("Failed to reorder image:", error);
+      return null;
+    }
+    return data[0];
   }
 };

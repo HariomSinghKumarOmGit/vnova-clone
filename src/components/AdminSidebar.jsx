@@ -1,5 +1,6 @@
 import React from 'react';
-import { LayoutDashboard, Package, Mail, CalendarDays, LogOut, Terminal, Cpu, Sun, Moon } from 'lucide-react';
+import { LayoutDashboard, Package, Mail, CalendarDays, LogOut, Terminal, Sun, Moon, Database } from 'lucide-react';
+import { isSupabaseConfigured } from '../lib/db';
 
 export default function AdminSidebar({ activeTab, setActiveTab, onExit }) {
   const [isDark, setIsDark] = React.useState(false);
@@ -63,6 +64,20 @@ export default function AdminSidebar({ activeTab, setActiveTab, onExit }) {
 
       {/* Bottom Profile / Exit Area */}
       <div className="p-4 border-t border-dark-border space-y-3">
+        {/* Database Status indicator */}
+        <div className="px-4 py-2.5 bg-dark-bg/60 border border-dark-border rounded-lg text-left">
+          <div className="text-[10px] font-mono text-slate-500 uppercase tracking-wider flex items-center space-x-1.5">
+            <Database className="h-3 w-3 text-slate-400" />
+            <span>Database Status</span>
+          </div>
+          <div className="flex items-center space-x-2 mt-1.5">
+            <span className={`h-1.5 w-1.5 rounded-full ${isSupabaseConfigured ? 'bg-brand-emerald animate-pulse' : 'bg-amber-500 animate-pulse'}`}></span>
+            <span className={`text-[11px] font-mono font-medium ${isSupabaseConfigured ? 'text-white' : 'text-amber-400'}`}>
+              {isSupabaseConfigured ? 'Supabase (Prod)' : 'Local Storage (Dev)'}
+            </span>
+          </div>
+        </div>
+
         <button
           onClick={toggleTheme}
           className="w-full flex items-center justify-center space-x-2 px-4 py-2.5 rounded-lg border border-dark-border text-slate-400 hover:text-white hover:bg-dark-highlight/40 text-xs font-mono tracking-wide uppercase transition-all duration-300"
