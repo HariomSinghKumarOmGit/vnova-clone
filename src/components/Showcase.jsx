@@ -185,7 +185,7 @@ export default function Showcase() {
             </button>
 
             {/* ── Hero Image Area ── */}
-            <div className="relative bg-dark-highlight flex items-center justify-center min-h-[320px] max-h-[400px] overflow-hidden shadow-inner">
+            <div className="relative bg-dark-highlight flex items-center justify-center h-[320px] sm:h-[400px] overflow-hidden shadow-inner w-full shrink-0">
               {imagesLoading ? (
                 <div className="flex items-center justify-center h-64">
                   <div className="h-8 w-8 border-2 border-brand-cyan border-t-transparent rounded-full spinner" />
@@ -203,7 +203,7 @@ export default function Showcase() {
                       <img
                         src={productImages[activeImageIndex]}
                         alt={selectedProduct.name}
-                        className="max-h-[340px] max-w-full object-contain rounded-lg"
+                        className="h-full w-full object-contain rounded-lg"
                       />
                     )}
                   </div>
