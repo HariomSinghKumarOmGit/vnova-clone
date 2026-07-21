@@ -21,7 +21,6 @@ export default function App() {
   const [layout, setLayout] = useState('public'); // 'public' | 'admin'
   const [adminTab, setAdminTab] = useState('dashboard');
   const [user, setUser] = useState(null); // { userId, isAdmin }
-  const [loginOpen, setLoginOpen] = useState(false);
   const [currentPath, setCurrentPath] = useState(window.location.pathname);
 
   useEffect(() => {
@@ -32,11 +31,7 @@ export default function App() {
     return () => window.removeEventListener('popstate', handleLocationChange);
   }, []);
 
-  useEffect(() => {
-    if (currentPath === '/login') {
-      setLoginOpen(true);
-    }
-  }, [currentPath]);
+
 
   const handleNavigate = (view) => {
     if (view === 'admin') {
@@ -55,7 +50,6 @@ export default function App() {
 
   const handleLogin = (userData) => {
     setUser(userData);
-    setLoginOpen(false);
     // If admin, redirect to admin panel immediately
     if (userData.isAdmin) {
       setLayout('admin');
@@ -140,19 +134,6 @@ export default function App() {
       </main>
 
       <Footer />
-
-      {/* Login Modal */}
-      <LoginModal
-        isOpen={loginOpen}
-        onClose={() => {
-          setLoginOpen(false);
-          if (currentPath === '/login') {
-             window.history.pushState({}, '', '/');
-             setCurrentPath('/');
-          }
-        }}
-        onLogin={handleLogin}
-      />
     </div>
   );
 }
