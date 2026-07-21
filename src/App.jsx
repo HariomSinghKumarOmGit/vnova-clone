@@ -76,6 +76,24 @@ export default function App() {
     setCurrentPath('/login');
   };
 
+  if (currentPath === '/login') {
+    return (
+      <div className="min-h-screen bg-dark-bg flex items-center justify-center p-4 selection:bg-brand-cyan selection:text-dark-bg relative overflow-hidden">
+        {/* Subtle grid background for industrial feel */}
+        <div className="absolute inset-0 bg-[linear-gradient(to_right,#080f1e_1px,transparent_1px),linear-gradient(to_bottom,#080f1e_1px,transparent_1px)] bg-[size:4rem_4rem] [mask-image:radial-gradient(ellipse_60%_50%_at_50%_0%,#000_70%,transparent_100%)] opacity-35 pointer-events-none"></div>
+        <LoginModal
+          isOpen={true}
+          isInline={true}
+          onClose={() => {
+            window.history.pushState({}, '', '/');
+            setCurrentPath('/');
+          }}
+          onLogin={handleLogin}
+        />
+      </div>
+    );
+  }
+
   if (layout === 'admin') {
     return (
       <div className="min-h-screen bg-dark-bg flex">

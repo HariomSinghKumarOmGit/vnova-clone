@@ -17,7 +17,7 @@ function getCredentials() {
 
 const CREDENTIALS = getCredentials();
 
-export default function LoginModal({ isOpen, onClose, onLogin }) {
+export default function LoginModal({ isOpen, onClose, onLogin, isInline = false }) {
   const [userId, setUserId] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
@@ -27,26 +27,26 @@ export default function LoginModal({ isOpen, onClose, onLogin }) {
   const inputRef = useRef(null);
 
   useEffect(() => {
-    if (isOpen && inputRef.current) {
+    if ((isOpen || isInline) && inputRef.current) {
       setTimeout(() => inputRef.current.focus(), 300);
     }
-    if (isOpen) {
+    if (isOpen || isInline) {
       setUserId('');
       setPassword('');
       setError('');
       setIsClosing(false);
     }
-  }, [isOpen]);
+  }, [isOpen, isInline]);
 
   // Lock body scroll when modal is open
   useEffect(() => {
-    if (isOpen) {
+    if (isOpen && !isInline) {
       document.body.style.overflow = 'hidden';
     } else {
       document.body.style.overflow = '';
     }
     return () => { document.body.style.overflow = ''; };
-  }, [isOpen]);
+  }, [isOpen, isInline]);
 
   const handleClose = () => {
     setIsClosing(true);
@@ -82,22 +82,17 @@ export default function LoginModal({ isOpen, onClose, onLogin }) {
     setIsLoading(false);
   };
 
-  if (!isOpen) return null;
+  if (!isOpen && !isInline) return null;
 
-  return (
+  const cardContent = (
     <div
-      className={`fixed inset-0 z-[100] flex items-center justify-center ${isClosing ? 'login-backdrop-out' : 'login-backdrop-in'}`}
-      style={{ background: 'rgba(0, 0, 0, 0.75)', backdropFilter: 'blur(8px)', WebkitBackdropFilter: 'blur(8px)' }}
-      onClick={handleClose}
+      className={`relative w-[90vw] max-w-lg h-[80vh] max-h-[640px] flex flex-col rounded-2xl border border-dark-border overflow-hidden ${isClosing ? 'login-card-out' : 'login-card-in'}`}
+      style={{
+        background: 'linear-gradient(165deg, rgba(15,23,42,0.95) 0%, rgba(9,13,22,0.98) 100%)',
+        boxShadow: '0 0 60px -15px rgba(6, 182, 212, 0.15), 0 25px 50px -12px rgba(0,0,0,0.6)',
+      }}
+      onClick={e => e.stopPropagation()}
     >
-      <div
-        className={`relative w-[90vw] max-w-lg h-[80vh] max-h-[640px] flex flex-col rounded-2xl border border-dark-border overflow-hidden ${isClosing ? 'login-card-out' : 'login-card-in'}`}
-        style={{
-          background: 'linear-gradient(165deg, rgba(15,23,42,0.95) 0%, rgba(9,13,22,0.98) 100%)',
-          boxShadow: '0 0 60px -15px rgba(6, 182, 212, 0.15), 0 25px 50px -12px rgba(0,0,0,0.6)',
-        }}
-        onClick={e => e.stopPropagation()}
-      >
         {/* Decorative top glow bar */}
         <div className="absolute top-0 left-0 right-0 h-[2px] bg-gradient-to-r from-transparent via-brand-cyan to-transparent opacity-70"></div>
 
@@ -211,6 +206,19 @@ export default function LoginModal({ isOpen, onClose, onLogin }) {
         {/* Decorative bottom elements */}
         <div className="absolute bottom-0 left-0 right-0 h-32 bg-gradient-to-t from-brand-cyan/[0.03] to-transparent pointer-events-none"></div>
       </div>
+  );
+
+  if (isInline) {
+    return cardContent;
+  }
+
+  return (
+    <div
+      className={`fixed inset-0 z-[100] flex items-center justify-center ${isClosing ? 'login-backdrop-out' : 'login-backdrop-in'}`}
+      style={{ background: 'rgba(0, 0, 0, 0.75)', backdropFilter: 'blur(8px)', WebkitBackdropFilter: 'blur(8px)' }}
+      onClick={handleClose}
+    >
+      {cardContent}
     </div>
   );
 }
