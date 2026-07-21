@@ -16,6 +16,7 @@ import AdminDashboard from './components/AdminDashboard';
 import AdminInventory from './components/AdminInventory';
 import AdminQueries from './components/AdminQueries';
 import AdminBookings from './components/AdminBookings';
+// hello 
 
 export default function App() {
   const [layout, setLayout] = useState('public'); // 'public' | 'admin'
