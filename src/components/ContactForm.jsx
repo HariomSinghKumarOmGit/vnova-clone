@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { db } from '../lib/db';
 import { Send, Calendar, CheckCircle2, Clock } from 'lucide-react';
+import CustomDatePicker from './CustomDatePicker';
 
 const TIME_SLOTS = [
   "08:30 AM - 10:00 AM",
@@ -17,7 +18,7 @@ const PURPOSE_OPTIONS = [
   "Other Services"
 ];
 
-export default function ContactForm() {
+export default function ContactForm({ user, navigateToLogin }) {
   // Form 1: Corporate Queries
   const [queryForm, setQueryForm] = useState({
     fullName: '',
@@ -38,9 +39,37 @@ export default function ContactForm() {
   const [bookingSuccess, setBookingSuccess] = useState(false);
   const [bookingLoading, setBookingLoading] = useState(false);
 
+  // Spam protection
+  const checkSpam = () => {
+    const now = Date.now();
+    const spamData = JSON.parse(localStorage.getItem('vnova_spam_data') || '{"count": 0, "lastTime": 0}');
+    
+    // Reset if cooling period (15 mins) has passed
+    if (now - spamData.lastTime > 15 * 60 * 1000) {
+      spamData.count = 0;
+    }
+
+    if (spamData.count >= 4) {
+      alert("Cooling period active. You have submitted too many requests recently. Please wait 15 minutes before trying again.");
+      return false;
+    }
+
+    spamData.count += 1;
+    spamData.lastTime = now;
+    localStorage.setItem('vnova_spam_data', JSON.stringify(spamData));
+    return true;
+  };
+
   // Handle Query Submit
   const handleQuerySubmit = async (e) => {
     e.preventDefault();
+    if (!user) {
+      navigateToLogin();
+      return;
+    }
+
+    if (!checkSpam()) return;
+
     if (!queryForm.fullName || !queryForm.companyEmail || !queryForm.message) {
       alert("Please fill in all required fields.");
       return;
@@ -69,6 +98,13 @@ export default function ContactForm() {
   // Handle Booking Submit
   const handleBookingSubmit = async (e) => {
     e.preventDefault();
+    if (!user) {
+      navigateToLogin();
+      return;
+    }
+
+    if (!checkSpam()) return;
+
     if (!bookingForm.visitorName || !bookingForm.targetDate) {
       alert("Please fill in all required fields.");
       return;
@@ -237,19 +273,15 @@ export default function ContactForm() {
                   />
                 </div>
 
-                <div>
+                 <div>
                   <label className="block text-xs font-mono uppercase tracking-wider text-slate-400 mb-2">
                     Target Date <span className="text-brand-emerald">*</span>
                   </label>
-                  <div className="relative">
-                    <input
-                      type="date"
-                      required
-                      value={bookingForm.targetDate}
-                      onChange={(e) => setBookingForm({ ...bookingForm, targetDate: e.target.value })}
-                      className="w-full rounded-lg border border-dark-border bg-dark-bg px-4 py-3 text-sm text-white focus:border-brand-emerald focus:outline-none transition-colors [color-scheme:dark]"
-                    />
-                  </div>
+                  <CustomDatePicker
+                    value={bookingForm.targetDate}
+                    onChange={(dateStr) => setBookingForm({ ...bookingForm, targetDate: dateStr })}
+                    accentColor="emerald"
+                  />
                 </div>
 
                 <div>

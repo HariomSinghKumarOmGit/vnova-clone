@@ -1,7 +1,7 @@
 import React from 'react';
-import { Cpu, LogIn, Sun, Moon, UserCircle, LogOut, ChevronDown } from 'lucide-react';
+import { Cpu, Sun, Moon, UserCircle, LogOut, ChevronDown } from 'lucide-react';
 
-export default function Navbar({ onNavigate, currentView, user, onOpenLogin, onLogout }) {
+export default function Navbar({ onNavigate, user, onLogout }) {
   const [isDark, setIsDark] = React.useState(false);
   const [profileOpen, setProfileOpen] = React.useState(false);
   const profileRef = React.useRef(null);
@@ -96,16 +96,8 @@ export default function Navbar({ onNavigate, currentView, user, onOpenLogin, onL
               {isDark ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
             </button>
 
-            {/* Login Button OR Profile Icon */}
-            {!user ? (
-              <button
-                onClick={onOpenLogin}
-                className="flex items-center space-x-2 rounded-lg px-4 py-2 text-xs font-mono tracking-wide uppercase transition-all duration-300 border border-brand-cyan/40 bg-brand-cyan/10 text-brand-cyan hover:bg-brand-cyan/20 glow-cyan"
-              >
-                <LogIn className="h-4 w-4" />
-                <span>Login</span>
-              </button>
-            ) : (
+            {/* Profile Icon (Only shown when logged in) */}
+            {user && (
               <div className="relative" ref={profileRef}>
                 <button
                   onClick={() => setProfileOpen(!profileOpen)}

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 
 // Public Components
 import Navbar from './components/Navbar';
@@ -22,6 +22,21 @@ export default function App() {
   const [adminTab, setAdminTab] = useState('dashboard');
   const [user, setUser] = useState(null); // { userId, isAdmin }
   const [loginOpen, setLoginOpen] = useState(false);
+  const [currentPath, setCurrentPath] = useState(window.location.pathname);
+
+  useEffect(() => {
+    const handleLocationChange = () => {
+      setCurrentPath(window.location.pathname);
+    };
+    window.addEventListener('popstate', handleLocationChange);
+    return () => window.removeEventListener('popstate', handleLocationChange);
+  }, []);
+
+  useEffect(() => {
+    if (currentPath === '/login') {
+      setLoginOpen(true);
+    }
+  }, [currentPath]);
 
   const handleNavigate = (view) => {
     if (view === 'admin') {
@@ -31,21 +46,34 @@ export default function App() {
       }
     } else {
       setLayout('public');
+      if (currentPath !== '/') {
+        window.history.pushState({}, '', '/');
+        setCurrentPath('/');
+      }
     }
   };
 
   const handleLogin = (userData) => {
     setUser(userData);
+    setLoginOpen(false);
     // If admin, redirect to admin panel immediately
     if (userData.isAdmin) {
       setLayout('admin');
       setAdminTab('dashboard');
+    } else {
+      window.history.pushState({}, '', '/');
+      setCurrentPath('/');
     }
   };
 
   const handleLogout = () => {
     setUser(null);
     setLayout('public');
+  };
+  
+  const navigateToLogin = () => {
+    window.history.pushState({}, '', '/login');
+    setCurrentPath('/login');
   };
 
   if (layout === 'admin') {
@@ -81,7 +109,7 @@ export default function App() {
         onNavigate={handleNavigate} 
         currentView="public" 
         user={user}
-        onOpenLogin={() => setLoginOpen(true)}
+        onOpenLogin={navigateToLogin}
         onLogout={handleLogout}
       />
       
@@ -90,7 +118,7 @@ export default function App() {
         <Showcase />
         <Industries />
         <Pricing />
-        <ContactForm />
+        <ContactForm user={user} navigateToLogin={navigateToLogin} />
       </main>
 
       <Footer />
@@ -98,7 +126,13 @@ export default function App() {
       {/* Login Modal */}
       <LoginModal
         isOpen={loginOpen}
-        onClose={() => setLoginOpen(false)}
+        onClose={() => {
+          setLoginOpen(false);
+          if (currentPath === '/login') {
+             window.history.pushState({}, '', '/');
+             setCurrentPath('/');
+          }
+        }}
         onLogin={handleLogin}
       />
     </div>
